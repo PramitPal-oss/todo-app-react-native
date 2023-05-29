@@ -1,20 +1,84 @@
+import { StyleSheet, View, FlatList, Alert, Button } from 'react-native';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import GoalItem from './components/GoalItem';
+import GoalInput from './components/GoalInput';
 
 export default function App() {
+  const [courseGoals, setCourseGoals] = useState([]);
+  const [modalIsVsible, setModaleisVisible] = useState(false);
+
+  const startAddGoalHandler = function () {
+    setModaleisVisible(true);
+  };
+
+  const endAddGoalHandler = function () {
+    setModaleisVisible(false);
+  };
+
+  const addGoalHandler = function (enteredGoalText) {
+    if (enteredGoalText.length === 0) {
+      return Alert.alert('Hey Please fill the input');
+    }
+    setCourseGoals((prev) => [
+      ...prev,
+      { text: enteredGoalText, id: Math.random().toString() },
+    ]);
+    endAddGoalHandler();
+  };
+
+  const deleteGoalHandler = function (id) {
+    setCourseGoals((prev) => {
+      return prev.filter((el) => el.id !== id);
+    });
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <StatusBar style="light" />
+      <View style={styles.appContainer}>
+        <Button
+          title="Add New Goal"
+          color="#a065ec"
+          onPress={startAddGoalHandler}
+        />
+        <GoalInput
+          onAddGoal={addGoalHandler}
+          visible={modalIsVsible}
+          onCancel={endAddGoalHandler}
+        />
+        <View style={styles.goalsContainer}>
+          <FlatList
+            alwaysBounceVertical={false}
+            data={courseGoals}
+            renderItem={(itemData) => {
+              return (
+                <GoalItem
+                  text={itemData.item.text}
+                  onDeleteItem={() => deleteGoalHandler(itemData.item.id)}
+                />
+              );
+            }}
+            keyExtractor={(item, index) => {
+              return item.id;
+            }}
+          />
+        </View>
+      </View>
+    </>
   );
 }
 
+//margin,padding and all components always converted in px
+
 const styles = StyleSheet.create({
-  container: {
+  appContainer: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingTop: 50,
+    paddingHorizontal: 16,
+    backgroundColor: '#1e085a',
+  },
+  goalsContainer: {
+    flex: 5,
   },
 });
